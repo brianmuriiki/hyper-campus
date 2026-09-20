@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { isRequired } from '../lib/validation'
+import { useAuthStore } from '../store/authStore'
 import AuthCard from '../components/AuthCard'
 import FormField from '../components/FormField'
 
 export default function Login() {
   const navigate = useNavigate()
+  const setSession = useAuthStore((s) => s.setSession)
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
@@ -28,7 +30,6 @@ export default function Login() {
 
     setSubmitting(true)
     try {
-      // resolve "email or student email" to the actual auth email
       const { data: resolvedEmail, error: resolveError } = await supabase.rpc(
         'resolve_login_email',
         { identifier }
@@ -38,7 +39,7 @@ export default function Login() {
         return
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: resolvedEmail,
         password,
       })
@@ -47,6 +48,9 @@ export default function Login() {
         return
       }
 
+      // Sync the store immediately rather than waiting on the auth listener,
+      // so the very next render of AppShell already sees a valid session.
+      setSession(signInData.session)
       navigate('/app/repository', { replace: true })
     } finally {
       setSubmitting(false)
@@ -104,7 +108,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-ink/90 disabled:opacity-60"
+          className="mt-2 rounded-md bg-fill px-4 py-2.5 text-sm font-medium text-on-fill transition-colors hover:opacity-90 disabled:opacity-60"
         >
           {submitting ? 'Logging in…' : 'Log in'}
         </button>

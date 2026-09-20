@@ -147,3 +147,41 @@ body {
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .animate-pop-in { animation: pop-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+/* ---------- repository ---------- */
+.dropzone {
+  border: 1.5px dashed var(--border-value);
+  border-radius: 8px;
+  padding: 28px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.dropzone:hover,
+.dropzone-active {
+  border-color: var(--text-soft);
+  background: var(--surface-raised);
+}
+.dropzone svg {
+  margin: 0 auto;
+  color: var(--text-soft);
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-value);
+}
+
+.badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge-pending { background: var(--border-value); color: var(--text-soft); }
+.badge-processing { background: var(--highlighter-wash); color: #92400e; }
+.badge-ready { background: color-mix(in srgb, var(--sage-value) 20%, transparent); color: var(--sage-value); }
+.badge-failed { background: #fecaca; color: #b91c1c; }

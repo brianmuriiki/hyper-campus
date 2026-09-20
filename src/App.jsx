@@ -1,16 +1,21 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+import { useAuthListener } from './hooks/useAuthListener'
 import Splash from './app/Splash'
 import Home from './app/Home'
-import Placeholder from './app/Placeholder'
-import AppShell from './app/AppShell'
 import Login from './app/Login'
 import Register from './app/Register'
+import Placeholder from './app/Placeholder'
+import AppShell from './app/AppShell'
+import Repository from './app/Repository'
+import UnitDetail from './app/UnitDetail'
 
 const queryClient = new QueryClient()
 
 export default function App() {
+  useAuthListener()
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -21,7 +26,8 @@ export default function App() {
           <Route path="/register" element={<Register />} />
 
           <Route path="/app" element={<AppShell />}>
-            <Route path="repository" element={<Placeholder label="Repository" />} />
+            <Route path="repository" element={<Repository />} />
+            <Route path="repository/:unitId" element={<UnitDetail />} />
             <Route path="hyper-chat" element={<Placeholder label="Hyper-Chat" />} />
             <Route path="discussion" element={<Placeholder label="Discussion" />} />
             <Route path="analysis" element={<Placeholder label="Analysis" />} />

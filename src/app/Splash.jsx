@@ -1,44 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import Logomark from '../components/Logomark'
 
 const MIN_DISPLAY_MS = 1300
 const EXIT_DURATION_MS = 350
-const SESSION_TIMEOUT_MS = 4000 // never wait longer than this for Supabase
 
 export default function Splash() {
   const navigate = useNavigate()
-  const setSession = useAuthStore((s) => s.setSession)
-  const setLoading = useAuthStore((s) => s.setLoading)
+  const session = useAuthStore((s) => s.session)
+  const isLoading = useAuthStore((s) => s.isLoading)
   const [exiting, setExiting] = useState(false)
 
   useEffect(() => {
-    let destination = '/home'
+    if (isLoading) return // wait for useAuthListener to resolve the initial session
 
-    const sessionCheck = supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => {
-        setSession(session)
-        destination = session ? '/app/repository' : '/home'
-      })
-      .catch(() => {
-        // network/config problem reaching Supabase — fail safe to the home page
-        destination = '/home'
-      })
-
-    const timeout = new Promise((resolve) => setTimeout(resolve, SESSION_TIMEOUT_MS))
     const minDisplay = new Promise((resolve) => setTimeout(resolve, MIN_DISPLAY_MS))
-
-    Promise.race([sessionCheck, timeout]).then(() => {
-      setLoading(false)
-      minDisplay.then(() => {
-        setExiting(true)
-        setTimeout(() => navigate(destination, { replace: true }), EXIT_DURATION_MS)
-      })
+    minDisplay.then(() => {
+      setExiting(true)
+      setTimeout(() => {
+        navigate(session ? '/app/repository' : '/home', { replace: true })
+      }, EXIT_DURATION_MS)
     })
-  }, [navigate, setSession, setLoading])
+  }, [isLoading, session, navigate])
 
   return (
     <div
