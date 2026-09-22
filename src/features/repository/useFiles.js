@@ -39,10 +39,19 @@ export function useUploadFile(unitId) {
   const userId = useAuthStore((s) => s.session?.user?.id)
 
   return useMutation({
-    mutationFn: ({ file, fileType }) => uploadFile({ file, fileType, unitId, userId }),
+    mutationFn: async ({ file, fileType }) => {
+      const uploaded = await uploadFile({ file, fileType, unitId, userId })
+      // fire-and-forget: tell the ingestion service to start processing
+      fetch(`${import.meta.env.VITE_INGESTION_SERVICE_URL}/ingest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId: uploaded.id }),
+      }).catch(() => {}) // ingestion failure surfaces via ingestion_status, not here
+      return uploaded
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files', unitId] })
-      queryClient.invalidateQueries({ queryKey: ['units', userId] }) // updates file counts on the list view
+      queryClient.invalidateQueries({ queryKey: ['units', userId] })
     },
   })
 }
