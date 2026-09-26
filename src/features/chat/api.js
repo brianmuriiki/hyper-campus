@@ -34,6 +34,14 @@ export async function togglePinSession({ sessionId, pinned }) {
   if (error) throw error
 }
 
+export async function renameSession({ sessionId, title }) {
+  const { error } = await supabase
+    .from('chat_sessions')
+    .update({ title })
+    .eq('id', sessionId)
+  if (error) throw error
+}
+
 export async function listMessages(sessionId) {
   const { data, error } = await supabase
     .from('chat_messages')
@@ -58,5 +66,25 @@ export async function togglePinMessage({ messageId, pinned }) {
 }
 
 export async function touchSession(sessionId, extraSeconds) {
-  await supabase.rpc('increment_session_time', { p_session_id: sessionId, p_seconds: extraSeconds })
+  const { error } = await supabase.rpc('increment_session_time', {
+    p_session_id: sessionId,
+    p_seconds: extraSeconds,
+  })
+  if (error) console.error('Heartbeat failed:', error)
+}
+
+export async function uploadChatAttachment({ file, userId }) {
+  const ext = file.name.split('.').pop()
+  const storageKey = `${userId}/${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage.from('chat-attachments').upload(storageKey, file)
+  if (error) throw error
+  return { storageKey, name: file.name, type: file.type }
+}
+
+export async function getAttachmentSignedUrl(storageKey) {
+  const { data, error } = await supabase.storage
+    .from('chat-attachments')
+    .createSignedUrl(storageKey, 300)
+  if (error) throw error
+  return data.signedUrl
 }

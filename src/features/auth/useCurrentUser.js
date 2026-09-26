@@ -5,7 +5,10 @@ import { useAuthStore } from '../../store/authStore'
 async function fetchCurrentUser(userId) {
   const { data, error } = await supabase
     .from('users')
-    .select('name, email, profile_picture_url')
+    .select(
+      'id, name, email, student_email, profile_picture_url, role, moderator_scope, ' +
+      'year_of_study, course, campus, admission_number, phone_number, id_number'
+    )
     .eq('id', userId)
     .single()
   if (error) throw error

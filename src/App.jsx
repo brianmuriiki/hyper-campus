@@ -6,11 +6,16 @@ import Splash from './app/Splash'
 import Home from './app/Home'
 import Login from './app/Login'
 import Register from './app/Register'
+import CompleteProfile from './app/CompleteProfile'
 import Placeholder from './app/Placeholder'
 import AppShell from './app/AppShell'
 import Repository from './app/Repository'
 import UnitDetail from './app/UnitDetail'
 import HyperChat from './app/HyperChat'
+import Discussion from './app/Discussion'
+import RoomChat from './app/RoomChat'
+import Profile from './app/Profile'
+import Analysis from './app/Analysis'
 
 const queryClient = new QueryClient()
 
@@ -25,14 +30,17 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
 
           <Route path="/app" element={<AppShell />}>
             <Route path="repository" element={<Repository />} />
             <Route path="repository/:unitId" element={<UnitDetail />} />
             <Route path="hyper-chat" element={<HyperChat />} />
-            <Route path="discussion" element={<Placeholder label="Discussion" />} />
-            <Route path="analysis" element={<Placeholder label="Analysis" />} />
-            <Route path="profile" element={<Placeholder label="Profile" />} />
+            <Route path="discussion" element={<Discussion />} />
+            <Route path="discussion/:roomId" element={<RoomChat />} />
+            <Route path="analysis" element={<Analysis />} />
+            <Route path="profile" element={<Profile />} />
+
           </Route>
 
           <Route path="/admin/*" element={<Placeholder label="Admin" />} />
