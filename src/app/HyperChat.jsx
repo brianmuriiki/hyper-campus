@@ -37,6 +37,7 @@ export default function HyperChat() {
   const [renameValue, setRenameValue] = useState('')
   const [previewFile, setPreviewFile] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
+  const [sessionsOpen, setSessionsOpen] = useState(false)
 
   const attachmentInputRef = useRef(null)
   const scrollBottomRef = useRef(null)
@@ -151,7 +152,7 @@ export default function HyperChat() {
       <div
         key={s.id}
         className={`session-row cursor-pointer ${s.id === activeSessionId ? 'active' : ''}`}
-        onClick={() => setActiveSessionId(s.id)}
+        onClick={() => { setActiveSessionId(s.id); setSessionsOpen(false) }}
       >
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm">{s.title}</p>
@@ -180,8 +181,20 @@ export default function HyperChat() {
   const hasNoSessions = sessions && sessions.length === 0
 
   return (
-    <div className="flex h-full">
-      <div className="w-64 shrink-0 border-r border-line p-4">
+    <div className="chat-layout flex h-full min-w-0">
+      <div className="chat-mobile-header">
+        <button
+          type="button"
+          className="rounded-md border border-line px-3 py-1.5 text-sm"
+          aria-expanded={sessionsOpen}
+          onClick={() => setSessionsOpen((open) => !open)}
+        >
+          Chats
+        </button>
+        <p className="min-w-0 flex-1 truncate text-sm text-ink-soft">{activeSession?.title || 'New chat'}</p>
+      </div>
+      {sessionsOpen && <button className="chat-mobile-overlay" aria-label="Close chats menu" onClick={() => setSessionsOpen(false)} />}
+      <div className={`chat-sessions w-64 shrink-0 overflow-y-auto border-r border-line p-4 ${sessionsOpen ? 'is-open' : ''}`}>
         {hasNoUnits && (
           <p className="mb-3 rounded-md bg-highlighter-soft px-2.5 py-2 text-xs text-ink">
             Your Repository is empty — you can still chat generally, but upload notes there first to get answers from your own material.
@@ -215,7 +228,7 @@ export default function HyperChat() {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="chat-workspace flex min-w-0 flex-1 flex-col p-6">
         {!activeSessionId && hasNoSessions && (
           <div className="empty-state">
             <p className="font-display text-base font-medium text-ink">Start your first chat</p>

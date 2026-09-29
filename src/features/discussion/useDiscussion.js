@@ -64,7 +64,7 @@ export function useRoomMessages(roomId) {
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
-      .channel(`room-messages-${roomId}`)
+      .channel(`room-messages-${roomId}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'room_messages', filter: `room_id=eq.${roomId}` },
@@ -115,7 +115,7 @@ export function usePresence(roomId, currentUser) {
   useEffect(() => {
     if (!roomId || !currentUser) return
 
-    const channel = supabase.channel(`presence-${roomId}`, {
+    const channel = supabase.channel(`presence-${roomId}-${crypto.randomUUID()}`, {
       config: { presence: { key: currentUser.id } },
     })
 
@@ -160,7 +160,7 @@ export function usePendingInvites(userId) {
   useEffect(() => {
     if (!userId) return
     const channel = supabase
-      .channel(`invites-${userId}`)
+      .channel(`invites-${userId}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'room_invites', filter: `invited_user_id=eq.${userId}` },
@@ -193,7 +193,7 @@ export function useActiveCalls(userId) {
   useEffect(() => {
     if (!userId) return
     const channel = supabase
-      .channel(`active-calls-${userId}`)
+      .channel(`active-calls-${userId}-${crypto.randomUUID()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'room_calls' }, () =>
         queryClient.invalidateQueries({ queryKey: ['activeCalls', userId] })
       )
@@ -216,7 +216,7 @@ export function useActiveCallForRoom(roomId) {
   useEffect(() => {
     if (!roomId) return
     const channel = supabase
-      .channel(`room-call-${roomId}`)
+      .channel(`room-call-${roomId}-${crypto.randomUUID()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'room_calls', filter: `room_id=eq.${roomId}` }, () =>
         queryClient.invalidateQueries({ queryKey: ['roomCall', roomId] })
       )

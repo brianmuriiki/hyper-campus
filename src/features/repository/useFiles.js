@@ -18,7 +18,7 @@ export function useFiles(unitId) {
     if (!unitId) return
 
     const channel = supabase
-      .channel(`files-${unitId}`)
+      .channel(`files-${unitId}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'files', filter: `unit_id=eq.${unitId}` },

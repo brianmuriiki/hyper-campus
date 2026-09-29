@@ -45,7 +45,7 @@ export default function InviteBell({ userId }) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-10 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-lg border border-line bg-paper-raised p-2 shadow-lg">
+        <div className="mobile-safe-popover absolute left-0 top-10 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-lg border border-line bg-paper-raised p-2 shadow-lg">
           <div className="mb-1 flex items-center justify-between px-1">
             <p className="text-xs font-medium text-ink-soft">Invites & calls</p>
             <button onClick={() => setOpen(false)} className="icon-btn" aria-label="Close">

@@ -10,14 +10,14 @@ export function useNotifications() {
 
   const query = useQuery({
     queryKey: ['notifications', userId],
-    queryFn: listNotifications,
+    queryFn: () => listNotifications(userId),
     enabled: !!userId,
   })
 
   useEffect(() => {
     if (!userId) return
     const channel = supabase
-      .channel('notifications-feed')
+      .channel(`notifications-feed-${userId}-${crypto.randomUUID()}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, () =>
         queryClient.invalidateQueries({ queryKey: ['notifications', userId] })
       )

@@ -1,4 +1,5 @@
-import { NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useCurrentUser } from '../features/auth/useCurrentUser'
@@ -18,11 +19,15 @@ const NAV_ITEMS = [
 ]
 
 export default function AppShell() {
+  const [menuOpen, setMenuOpen] = useState(false)
   const session = useAuthStore((s) => s.session)
   const isLoading = useAuthStore((s) => s.isLoading)
   const setSession = useAuthStore((s) => s.setSession)
   const navigate = useNavigate()
+  const location = useLocation()
   const { data: currentUser, isLoading: userLoading } = useCurrentUser()
+
+  useEffect(() => setMenuOpen(false), [location.pathname])
 
   if (isLoading) return null
   if (!session) return <Navigate to="/login" replace />
@@ -36,8 +41,26 @@ export default function AppShell() {
   }
 
   return (
-    <div className="flex h-screen bg-paper text-ink">
-      <nav className="flex w-56 shrink-0 flex-col border-r border-line p-4">
+    <div className="app-layout flex h-screen bg-paper text-ink">
+      <header className="app-mobile-header">
+        <button
+          type="button"
+          className="app-mobile-toggle"
+          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span aria-hidden="true">{menuOpen ? '×' : '☰'}</span>
+        </button>
+        <Logo size={23} textSize="text-sm" />
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <InviteBell userId={currentUser?.id} />
+          <ThemeToggle />
+        </div>
+      </header>
+      {menuOpen && <button className="app-mobile-overlay" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />}
+      <nav className={`app-sidebar flex w-56 shrink-0 flex-col border-r border-line p-4 ${menuOpen ? 'is-open' : ''}`}>
                 <div className="mb-6 flex items-center justify-between px-2">
           <Logo size={24} textSize="text-sm" />
                     <div className="flex items-center gap-1">
@@ -52,6 +75,7 @@ export default function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 `rounded-lg px-3 py-2 text-sm ${
                   isActive ? 'bg-paper-raised font-medium text-ink' : 'text-ink-soft hover:bg-paper-raised'
@@ -61,9 +85,22 @@ export default function AppShell() {
               {item.label}
             </NavLink>
           ))}
+          {currentUser?.role === 'admin' && (
+            <NavLink
+              to="/admin/users"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                `rounded-lg px-3 py-2 text-sm ${
+                  isActive ? 'bg-paper-raised font-medium text-ink' : 'text-ink-soft hover:bg-paper-raised'
+                }`
+              }
+            >
+              Admin
+            </NavLink>
+          )}
         </div>
 
-        <NavLink to="/app/profile" className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-paper-raised">
+        <NavLink to="/app/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-paper-raised">
           <Avatar name={currentUser?.name} imageUrl={currentUser?.profile_picture_url} size={32} />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-ink">{currentUser?.name || 'Loading…'}</p>
@@ -79,7 +116,7 @@ export default function AppShell() {
           Log out
         </button>
       </nav>
-      <main className="flex-1 overflow-auto">
+      <main className="app-main flex-1 overflow-auto">
         <Outlet />
       </main>
     </div>
