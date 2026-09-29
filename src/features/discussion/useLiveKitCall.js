@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Room, RoomEvent, Track } from 'livekit-client'
 import { startCallRecord, endCallRecord } from './api'
+import { ingestionUrl } from '../../lib/ingestionUrl'
 
 export function useLiveKitCall(roomId, user) {
   const roomRef = useRef(null)
@@ -18,7 +19,7 @@ export function useLiveKitCall(roomId, user) {
     setError(null)
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_INGESTION_SERVICE_URL}/livekit/token`, {
+      const res = await fetch(ingestionUrl('/livekit/token'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roomId, userId: user.id, userName: user.name }),

@@ -6,6 +6,7 @@ import {
   deleteMessage, togglePinMessage,
 } from './api'
 import { useAuthStore } from '../../store/authStore'
+import { ingestionUrl } from '../../lib/ingestionUrl'
 
 export function useSessions() {
   const userId = useAuthStore((s) => s.session?.user?.id)
@@ -93,7 +94,7 @@ export function useSendMessage(sessionId, unitId) {
     abortRef.current = controller
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_INGESTION_SERVICE_URL}/chat/message`, {
+      const response = await fetch(ingestionUrl('/chat/message'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

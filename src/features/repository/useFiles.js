@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { deleteFile, listFiles, uploadFile } from './api'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+import { ingestionUrl } from '../../lib/ingestionUrl'
 
 export function useFiles(unitId) {
   const queryClient = useQueryClient()
@@ -42,7 +43,7 @@ export function useUploadFile(unitId) {
     mutationFn: async ({ file, fileType }) => {
       const uploaded = await uploadFile({ file, fileType, unitId, userId })
       // fire-and-forget: tell the ingestion service to start processing
-      fetch(`${import.meta.env.VITE_INGESTION_SERVICE_URL}/ingest`, {
+      fetch(ingestionUrl('/ingest'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId: uploaded.id }),
