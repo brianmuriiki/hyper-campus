@@ -32,6 +32,7 @@ export default function HyperChat() {
   const [newChatModel, setNewChatModel] = useState('openrouter/free')
   const [pendingMessage, setPendingMessage] = useState(null)
   const [pendingAttachment, setPendingAttachment] = useState(null) // { file, uploading }
+  const [attachmentProgress, setAttachmentProgress] = useState(0)
   const [attachmentError, setAttachmentError] = useState('')
   const [pendingDeleteSession, setPendingDeleteSession] = useState(null)
   const [pendingDeleteMessage, setPendingDeleteMessage] = useState(null)
@@ -77,9 +78,10 @@ export default function HyperChat() {
     input.value = ''
     if (!file) return
     setAttachmentError('')
+    setAttachmentProgress(0)
     setPendingAttachment({ file, uploading: true })
     try {
-      const uploaded = await uploadChatAttachment({ file, userId })
+      const uploaded = await uploadChatAttachment({ file, userId, onProgress: setAttachmentProgress })
       setPendingAttachment({ ...uploaded, uploading: false })
     } catch (error) {
       setPendingAttachment(null)
@@ -343,7 +345,7 @@ export default function HyperChat() {
             {pendingAttachment && (
               <div className="mb-2">
                 <AttachmentChip
-                  name={pendingAttachment.uploading ? 'Uploading…' : pendingAttachment.name}
+                  name={pendingAttachment.uploading ? `Uploading… ${attachmentProgress}%` : pendingAttachment.name}
                   onRemove={() => {
                     setPendingAttachment(null)
                     setAttachmentError('')

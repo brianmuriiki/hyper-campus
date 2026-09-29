@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase'
 import { MIME_TYPES_BY_EXTENSION } from '../../lib/fileTypes'
-import * as tus from 'tus-js-client'
+import { uploadToSupabaseStorage } from '../../lib/uploadToSupabaseStorage'
 
 export async function listUnits(userId) {
   const { data, error } = await supabase
@@ -43,43 +43,8 @@ export async function uploadFile({ file, fileType, unitId, userId, onProgress })
   const storageKey = `${userId}/${unitId}/${crypto.randomUUID()}.${ext}`
   const contentType = MIME_TYPES_BY_EXTENSION[ext] || file.type || 'application/octet-stream'
 
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-  if (sessionError) throw sessionError
-  if (!session?.access_token) throw new Error('Your session expired. Please sign in again and retry the upload.')
-
-  const supabaseUrl = new URL(supabase.supabaseUrl)
-  const storageHost = supabaseUrl.hostname.endsWith('.supabase.co')
-    ? supabaseUrl.hostname.replace(/\.supabase\.co$/, '.storage.supabase.co')
-    : supabaseUrl.host
-  const endpoint = `${supabaseUrl.protocol}//${storageHost}/storage/v1/upload/resumable`
-
-  await new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
-      endpoint,
-      retryDelays: [0, 3000, 5000, 10000, 20000],
-      headers: {
-        authorization: `Bearer ${session.access_token}`,
-        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-      },
-      uploadDataDuringCreation: true,
-      removeFingerprintOnSuccess: true,
-      chunkSize: 6 * 1024 * 1024,
-      metadata: {
-        bucketName: 'repository-files',
-        objectName: storageKey,
-        contentType,
-        cacheControl: '3600',
-      },
-      onProgress(bytesUploaded, bytesTotal) {
-        onProgress?.(Math.round((bytesUploaded / bytesTotal) * 100))
-      },
-      onError(error) {
-        reject(new Error(`Storage upload failed: ${error.message || 'connection interrupted'}`))
-      },
-      onSuccess: resolve,
-    })
-
-    upload.start()
+  await uploadToSupabaseStorage({
+    bucketName: 'repository-files', objectName: storageKey, file, contentType, onProgress,
   })
 
   const { data, error } = await supabase

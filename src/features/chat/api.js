@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { uploadToSupabaseStorage } from '../../lib/uploadToSupabaseStorage'
 
 export async function listSessions(userId) {
   const { data, error } = await supabase
@@ -73,7 +74,7 @@ export async function touchSession(sessionId, extraSeconds) {
   if (error) console.error('Heartbeat failed:', error)
 }
 
-export async function uploadChatAttachment({ file, userId }) {
+export async function uploadChatAttachment({ file, userId, onProgress }) {
   const ext = file.name.split('.').pop()?.toLowerCase()
   const mimeTypes = {
     pdf: 'application/pdf',
@@ -91,10 +92,9 @@ export async function uploadChatAttachment({ file, userId }) {
   }
 
   const storageKey = `${userId}/${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage
-    .from('chat-attachments')
-    .upload(storageKey, file, { contentType: type })
-  if (error) throw error
+  await uploadToSupabaseStorage({
+    bucketName: 'chat-attachments', objectName: storageKey, file, contentType: type, onProgress,
+  })
   return { storageKey, name: file.name, type }
 }
 
