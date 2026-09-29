@@ -7,6 +7,7 @@ import Home from './app/Home'
 import Login from './app/Login'
 import Register from './app/Register'
 import CompleteProfile from './app/CompleteProfile'
+import GettingStarted from './app/GettingStarted'
 import AppShell from './app/AppShell'
 import Repository from './app/Repository'
 import UnitDetail from './app/UnitDetail'
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/getting-started" element={<GettingStarted />} />
 
           <Route path="/app" element={<AppShell />}>
             <Route path="repository" element={<Repository />} />

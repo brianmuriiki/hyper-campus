@@ -5,6 +5,7 @@ import { isRequired } from '../lib/validation'
 import { useAuthStore } from '../store/authStore'
 import AuthCard from '../components/AuthCard'
 import FormField from '../components/FormField'
+import { beginOnboarding, clearPendingOnboarding } from '../lib/onboarding'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -58,10 +59,15 @@ export default function Login() {
   }
 
   async function handleGoogle() {
-    await supabase.auth.signInWithOAuth({
+    beginOnboarding()
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/app/repository` },
     })
+    if (error) {
+      clearPendingOnboarding()
+      setFormError(error.message)
+    }
   }
 
   return (

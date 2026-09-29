@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 import AuthCard from '../components/AuthCard'
 import FormField from '../components/FormField'
 import ProfilePictureInput from '../components/ProfilePictureInput'
+import { beginOnboarding, clearPendingOnboarding } from '../lib/onboarding'
 
 const initialForm = {
   name: '',
@@ -63,6 +64,7 @@ export default function Register() {
 
     setSubmitting(true)
     try {
+      const signupStartedAt = Date.now()
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -83,6 +85,11 @@ export default function Register() {
       if (error) {
         setFormError(error.message)
         return
+      }
+
+      const accountCreatedAt = Date.parse(data.user?.created_at || '')
+      if (data.user?.id && Number.isFinite(accountCreatedAt) && accountCreatedAt >= signupStartedAt - 120_000) {
+        beginOnboarding(data.user.id)
       }
 
       // No session yet means email confirmation is required — stop here.
@@ -119,10 +126,15 @@ export default function Register() {
   }
 
   async function handleGoogle() {
-    await supabase.auth.signInWithOAuth({
+    beginOnboarding()
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/app/repository` },
     })
+    if (error) {
+      clearPendingOnboarding()
+      setFormError(error.message)
+    }
   }
 
   return (

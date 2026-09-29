@@ -9,6 +9,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import Avatar from '../components/Avatar'
 import InviteBell from '../components/InviteBell'
 import NotificationBell from '../components/NotificationBell'
+import { clearPendingOnboarding, hasPendingOnboarding, shouldShowOnboarding } from '../lib/onboarding'
 
 const NAV_ITEMS = [
   { to: '/app/repository', label: 'Repository' },
@@ -29,10 +30,18 @@ export default function AppShell() {
 
   useEffect(() => setMenuOpen(false), [location.pathname])
 
+  useEffect(() => {
+    if (!isLoading && session && !userLoading && isProfileComplete(currentUser) &&
+        hasPendingOnboarding() && !shouldShowOnboarding(session.user)) {
+      clearPendingOnboarding()
+    }
+  }, [isLoading, session, userLoading, currentUser])
+
   if (isLoading) return null
   if (!session) return <Navigate to="/login" replace />
   if (userLoading) return null
   if (!isProfileComplete(currentUser)) return <Navigate to="/complete-profile" replace />
+  if (shouldShowOnboarding(session.user)) return <Navigate to="/getting-started" replace />
 
   async function handleLogout() {
     await supabase.auth.signOut()
