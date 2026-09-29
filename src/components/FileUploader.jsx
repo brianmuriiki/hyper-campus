@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { ACCEPT_ATTR, resolveFileType } from '../lib/fileTypes'
 
-export default function FileUploader({ onUpload, uploading, uploadError }) {
+export default function FileUploader({ onUpload, uploading, uploadError, uploadProgress = 0 }) {
   const inputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState('')
@@ -36,7 +36,7 @@ export default function FileUploader({ onUpload, uploading, uploadError }) {
         className={`dropzone ${dragActive ? 'dropzone-active' : ''}`}
       >
         {uploading ? (
-          <p className="text-sm text-ink-soft">Uploading…</p>
+          <p className="text-sm text-ink-soft">Uploading… {uploadProgress}%</p>
         ) : (
           <>
             <UploadIcon />

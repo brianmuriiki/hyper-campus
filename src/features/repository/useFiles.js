@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { deleteFile, listFiles, uploadFile } from './api'
 import { supabase } from '../../lib/supabase'
@@ -39,9 +39,11 @@ export function useUploadFile(unitId) {
   const queryClient = useQueryClient()
   const userId = useAuthStore((s) => s.session?.user?.id)
 
-  return useMutation({
+  const [progress, setProgress] = useState(0)
+  const mutation = useMutation({
     mutationFn: async ({ file, fileType }) => {
-      const uploaded = await uploadFile({ file, fileType, unitId, userId })
+      setProgress(0)
+      const uploaded = await uploadFile({ file, fileType, unitId, userId, onProgress: setProgress })
       // fire-and-forget: tell the ingestion service to start processing
       fetch(ingestionUrl('/ingest'), {
         method: 'POST',
@@ -51,10 +53,13 @@ export function useUploadFile(unitId) {
       return uploaded
     },
     onSuccess: () => {
+      setProgress(100)
       queryClient.invalidateQueries({ queryKey: ['files', unitId] })
       queryClient.invalidateQueries({ queryKey: ['units', userId] })
     },
   })
+
+  return { ...mutation, progress }
 }
 
 export function useDeleteFile(unitId) {
