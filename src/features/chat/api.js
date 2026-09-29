@@ -74,11 +74,28 @@ export async function touchSession(sessionId, extraSeconds) {
 }
 
 export async function uploadChatAttachment({ file, userId }) {
-  const ext = file.name.split('.').pop()
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  const mimeTypes = {
+    pdf: 'application/pdf',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  }
+  const supportedMimeTypes = new Set(Object.values(mimeTypes))
+  const type = mimeTypes[ext] || (supportedMimeTypes.has(file.type) ? file.type : null)
+  if (!type) {
+    throw new Error('Unsupported file type. Use PDF, PNG, JPG, WEBP, DOCX, or PPTX.')
+  }
+
   const storageKey = `${userId}/${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from('chat-attachments').upload(storageKey, file)
+  const { error } = await supabase.storage
+    .from('chat-attachments')
+    .upload(storageKey, file, { contentType: type })
   if (error) throw error
-  return { storageKey, name: file.name, type: file.type }
+  return { storageKey, name: file.name, type }
 }
 
 export async function getAttachmentSignedUrl(storageKey) {

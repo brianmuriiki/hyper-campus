@@ -15,6 +15,7 @@ import ModelPicker from '../components/ModelPicker'
 import AttachmentChip from '../components/AttachmentChip'
 import FilePreviewModal from '../components/FilePreviewModal'
 import { PinIcon, TrashIconSmall, PencilIcon, CopyIcon, StopIcon, PaperclipIcon } from '../components/PinIcon'
+import { ACCEPT_ATTR } from '../lib/fileTypes'
 
 export default function HyperChat() {
   const userId = useAuthStore((s) => s.session?.user?.id)
@@ -31,6 +32,7 @@ export default function HyperChat() {
   const [newChatModel, setNewChatModel] = useState('openrouter/free')
   const [pendingMessage, setPendingMessage] = useState(null)
   const [pendingAttachment, setPendingAttachment] = useState(null) // { file, uploading }
+  const [attachmentError, setAttachmentError] = useState('')
   const [pendingDeleteSession, setPendingDeleteSession] = useState(null)
   const [pendingDeleteMessage, setPendingDeleteMessage] = useState(null)
   const [renamingSessionId, setRenamingSessionId] = useState(null)
@@ -70,21 +72,28 @@ export default function HyperChat() {
   }, [messages, streamingText])
 
   async function handleAttachmentSelect(e) {
-    const file = e.target.files?.[0]
+    const input = e.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
     if (!file) return
+    setAttachmentError('')
     setPendingAttachment({ file, uploading: true })
     try {
       const uploaded = await uploadChatAttachment({ file, userId })
       setPendingAttachment({ ...uploaded, uploading: false })
-    } catch {
+    } catch (error) {
       setPendingAttachment(null)
+      setAttachmentError(error.message || 'The file could not be uploaded. Please try again.')
     }
   }
 
   function handleNewSession() {
     createSession.mutate(
       { unitId: newChatUnitId || null, model: newChatModel },
-      { onSuccess: (session) => setActiveSessionId(session.id) }
+      { onSuccess: (session) => {
+        setActiveSessionId(session.id)
+        setSessionsOpen(false)
+      } }
     )
   }
 
@@ -233,6 +242,14 @@ export default function HyperChat() {
           <div className="empty-state">
             <p className="font-display text-base font-medium text-ink">Start your first chat</p>
             <p className="mt-1 max-w-sm text-sm">Pick a unit (or leave it on "All units"), choose a model, and hit New chat to begin.</p>
+            <button
+              type="button"
+              onClick={handleNewSession}
+              disabled={createSession.isPending}
+              className="chat-start-mobile-button rounded-md bg-fill px-4 py-2.5 text-sm font-medium text-on-fill transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {createSession.isPending ? 'Starting…' : 'Start chatting'}
+            </button>
           </div>
         )}
 
@@ -327,21 +344,31 @@ export default function HyperChat() {
               <div className="mb-2">
                 <AttachmentChip
                   name={pendingAttachment.uploading ? 'Uploading…' : pendingAttachment.name}
-                  onRemove={() => setPendingAttachment(null)}
+                  onRemove={() => {
+                    setPendingAttachment(null)
+                    setAttachmentError('')
+                  }}
                 />
               </div>
             )}
+            {attachmentError && <p className="mb-2 text-sm text-red-600" role="alert">{attachmentError}</p>}
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => attachmentInputRef.current?.click()}
                 className="rounded-md border border-line px-3 text-ink-soft hover:bg-paper-raised"
                 aria-label="Attach a file"
-                disabled={isStreaming}
+                disabled={isStreaming || pendingAttachment?.uploading}
               >
                 <PaperclipIcon />
               </button>
-              <input ref={attachmentInputRef} type="file" className="hidden" onChange={handleAttachmentSelect} />
+              <input
+                ref={attachmentInputRef}
+                type="file"
+                accept={ACCEPT_ATTR}
+                className="chat-file-input"
+                onChange={handleAttachmentSelect}
+              />
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

@@ -121,8 +121,25 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mx-auto flex max-w-7xl items-center px-6 py-8 lg:px-10">
-        <Logo size={18} textSize="text-xs" />
+      <footer className="border-t border-line bg-paper">
+        <div className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
+          <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <Logo size={22} textSize="text-sm" />
+              <p className="mt-2 max-w-xs text-sm text-ink-soft">
+                Your study resources, learning support, and campus discussions in one place.
+              </p>
+            </div>
+            <nav aria-label="Footer navigation" className="grid grid-cols-2 gap-x-10 gap-y-3 text-sm">
+              <a href="#how-it-works" className="text-ink-soft hover:text-ink">How it works</a>
+              <Link to="/login" className="text-ink-soft hover:text-ink">Log in</Link>
+              <Link to="/register" className="text-ink-soft hover:text-ink">Create an account</Link>
+            </nav>
+          </div>
+          <div className="mt-8 border-t border-line pt-5 text-xs text-ink-soft">
+            © {new Date().getFullYear()} Hyper-Campus. Learn Beyond Limits.
+          </div>
+        </div>
       </footer>
     </div>
   )

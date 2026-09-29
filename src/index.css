@@ -222,11 +222,33 @@ button:focus-visible {
 .admin-user-cards { display: none; }
 .chat-mobile-header { display: none; }
 .chat-mobile-overlay { display: none; }
+.chat-start-mobile-button { display: none; }
+.chat-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 @media (max-width: 767px) {
+  .chat-start-mobile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
   .mobile-safe-popover {
+    position: fixed;
+    top: 64px;
     left: auto;
-    right: 0;
+    right: 12px;
+    width: min(20rem, calc(100vw - 24px));
     max-height: calc(100dvh - 5rem);
     overflow-y: auto;
   }
