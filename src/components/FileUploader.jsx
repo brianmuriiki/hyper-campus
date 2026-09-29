@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { ACCEPT_ATTR, resolveFileType } from '../lib/fileTypes'
 
-export default function FileUploader({ onUpload, uploading }) {
+export default function FileUploader({ onUpload, uploading, uploadError }) {
   const inputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState('')
@@ -50,10 +50,13 @@ export default function FileUploader({ onUpload, uploading }) {
         ref={inputRef}
         type="file"
         accept={ACCEPT_ATTR}
-        className="hidden"
-        onChange={(e) => handleFiles(e.target.files)}
+        className="mobile-file-input"
+        onChange={(e) => {
+          handleFiles(e.currentTarget.files)
+          e.currentTarget.value = ''
+        }}
       />
-      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+      {(error || uploadError) && <p className="mt-2 break-words text-xs text-red-500" role="alert">{error || uploadError}</p>}
     </div>
   )
 }

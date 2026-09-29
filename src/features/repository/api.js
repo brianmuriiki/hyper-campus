@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { MIME_TYPES_BY_EXTENSION } from '../../lib/fileTypes'
 
 export async function listUnits(userId) {
   const { data, error } = await supabase
@@ -37,12 +38,13 @@ export async function listFiles(unitId) {
 }
 
 export async function uploadFile({ file, fileType, unitId, userId }) {
-  const ext = file.name.split('.').pop()
+  const ext = file.name.split('.').pop()?.toLowerCase()
   const storageKey = `${userId}/${unitId}/${crypto.randomUUID()}.${ext}`
+  const contentType = MIME_TYPES_BY_EXTENSION[ext] || file.type || 'application/octet-stream'
 
   const { error: uploadError } = await supabase.storage
     .from('repository-files')
-    .upload(storageKey, file)
+    .upload(storageKey, file, { contentType })
   if (uploadError) throw uploadError
 
   const { data, error } = await supabase

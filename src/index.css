@@ -223,7 +223,7 @@ button:focus-visible {
 .chat-mobile-header { display: none; }
 .chat-mobile-overlay { display: none; }
 .chat-start-mobile-button { display: none; }
-.chat-file-input {
+.mobile-file-input {
   position: absolute;
   width: 1px;
   height: 1px;

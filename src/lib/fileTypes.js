@@ -7,13 +7,24 @@ export const ACCEPTED_TYPES = {
   'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
 }
 
+export const MIME_TYPES_BY_EXTENSION = {
+  pdf: 'application/pdf',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+}
+
 export const ACCEPT_ATTR =
   '.pdf,.png,.jpg,.jpeg,.webp,.docx,.pptx,application/pdf,image/*,' +
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document,' +
   'application/vnd.openxmlformats-officedocument.presentationml.presentation'
 
 export function resolveFileType(file) {
-  return ACCEPTED_TYPES[file.type] || null
+  const extension = file.name.split('.').pop()?.toLowerCase()
+  return ACCEPTED_TYPES[file.type] || ACCEPTED_TYPES[MIME_TYPES_BY_EXTENSION[extension]] || null
 }
 
 export function formatBytes(bytes) {

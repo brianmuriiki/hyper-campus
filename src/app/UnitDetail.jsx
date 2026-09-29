@@ -61,6 +61,7 @@ export default function UnitDetail() {
       <div className="mt-6 max-w-xl">
         <FileUploader
           uploading={uploadFile.isPending}
+          uploadError={uploadFile.error?.message}
           onUpload={({ file, fileType }) => uploadFile.mutate({ file, fileType })}
         />
       </div>

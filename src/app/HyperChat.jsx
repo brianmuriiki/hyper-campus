@@ -366,7 +366,7 @@ export default function HyperChat() {
                 ref={attachmentInputRef}
                 type="file"
                 accept={ACCEPT_ATTR}
-                className="chat-file-input"
+                className="mobile-file-input"
                 onChange={handleAttachmentSelect}
               />
               <input
